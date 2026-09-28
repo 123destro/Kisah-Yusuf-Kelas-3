@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gim Interaktif: Kisah Yusuf</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Enforce 16:9 Aspect Ratio Container */
+        .aspect-16-9 {
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Custom scrollbar for mobile fit */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d97706;
+            border-radius: 4px;
+        }
+
+        /* Card transition effects */
+        .card-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-item:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Floating animation for cloud/decorations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-2 sm:p-4 text-slate-800">
+
+    <!-- Main 16:9 Aspect Ratio Container -->
+    <div id="game-viewport" class="relative w-full max-w-5xl aspect-16-9 bg-gradient-to-b from-sky-300 via-amber-100 to-amber-300 rounded-3xl shadow-2xl overflow-hidden border-4 sm:border-8 border-amber-400 flex flex-col justify-between p-2 sm:p-4">
+
+        <!-- SVG Egyptian Background Layer -->
+        <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <!-- Sun -->
+            <div class="absolute top-3 right-12 w-12 h-12 sm:w-20 sm:h-20 bg-yellow-300 rounded-full shadow-[0_0_30px_rgba(253,224,71,0.8)] animate-pulse"></div>
+            
+            <!-- Pyramids Background SVG -->
+            <svg class="absolute bottom-10 w-full h-1/2" viewBox="0 0 1000 300" preserveAspectRatio="none">
+                <!-- Far Pyramids -->
+                <polygon points="150,300 280,120 410,300" fill="#d97706" opacity="0.6"/>
+                <polygon points="280,120 410,300 340,300" fill="#b45309" opacity="0.6"/>
+                
+                <!-- Main Pyramid Left -->
+                <polygon points="50,300 200,80 350,300" fill="#f59e0b"/>
+                <polygon points="200,80 350,300 280,300" fill="#d97706"/>
+                
+                <!-- Main Pyramid Right -->
+                <polygon points="650,300 800,100 950,300" fill="#f59e0b"/>
+                <polygon points="800,100 950,300 880,300" fill="#d97706"/>
+                
+                <!-- Dunes -->
+                <path d="M 0,250 Q 250,180 500,250 T 1000,230 L 1000,300 L 0,300 Z" fill="#fbbf24"/>
+                <path d="M 0,270 Q 350,220 700,280 T 1000,260 L 1000,300 L 0,300 Z" fill="#f59e0b"/>
+            </svg>
+
+            <!-- Nile River SVG Path at the bottom -->
+            <svg class="absolute bottom-0 w-full h-12 sm:h-16" viewBox="0 0 1000 60" preserveAspectRatio="none">
+                <path d="M 0,20 Q 250,5 500,30 T 1000,15 L 1000,60 L 0,60 Z" fill="#0284c7" opacity="0.85"/>
+                <path d="M 0,35 Q 300,15 600,40 T 1000,25 L 1000,60 L 0,60 Z" fill="#0369a1"/>
+            </svg>
+
+            <!-- Decorative Palm Trees -->
+            <div class="absolute bottom-6 left-4 sm:left-8 text-xl sm:text-3xl animate-float">🌴</div>
+            <div class="absolute bottom-8 right-6 sm:right-12 text-2xl sm:text-4xl">🌴</div>
+        </div>
+
+        <!-- Top Header Navigation (Z-Index 10) -->
+        <header class="relative z-10 flex items-center justify-between bg-white/80 backdrop-blur-md px-2 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-md border border-amber-200">
+            <!-- Left: Title & Player Badge -->
+            <div class="flex items-center space-x-2">
+                <span class="text-xl sm:text-3xl">👑</span>
+                <div>
+                    <h1 class="text-xs sm:text-base md:text-lg font-bold text-amber-900 leading-tight">
+                        Kisah Yusuf
+                    </h1>
+                    <p class="text-[10px] sm:text-xs text-amber-800 font-medium">
+                        Pendidikan Agama Katolik dan Budi Pekerti Kelas 3 Fase B | Pemain: <span id="display-player-name" class="font-bold text-sky-700">Murid Kelas 3</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="flex items-center space-x-1.5 sm:space-x-2">
+                <button onclick="openLearningObjectivesModal()" class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl shadow border-b-2 border-sky-700 transition flex items-center space-x-1">
+                    <span>🎯</span>
+                    <span>Tujuan Pembelajaran</span>
+                </button>
+                <button onclick="resetGame()" class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl shadow border-b-2 border-rose-700 transition flex items-center space-x-1">
+                    <span>🔄</span>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Game Content (2-Column Grid inside 16:9 Viewport) -->
+        <main class="relative z-10 flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 my-1.5 sm:my-2 overflow-hidden">
+            
+            <!-- Left Column: Available Unordered Story Cards Pool (10 Items) -->
+            <section class="bg-amber-50/80 backdrop-blur-sm p-2 sm:p-3 rounded-2xl border-2 border-amber-300 flex flex-col justify-between overflow-hidden shadow-inner">
+                <div class="flex items-center justify-between mb-1">
+                    <h2 class="text-xs sm:text-sm font-bold text-amber-900 flex items-center gap-1">
+                        <span>📜</span> Peristiwa Kisah Yusuf (10 Peristiwa)
+                    </h2>
+                    <span class="text-[10px] text-amber-700 italic">Klik kartu lalu pilih posisinya</span>
+                </div>
+
+                <div id="cards-pool" class="grid grid-cols-1 gap-1.5 sm:gap-2 overflow-y-auto max-h-[calc(100%-1.75rem)] pr-1">
+                    <!-- Cards dynamically rendered here -->
+                </div>
+            </section>
+
+            <!-- Right Column: Numbered Timeline Slots (1 - 10) -->
+            <section class="bg-sky-50/80 backdrop-blur-sm p-2 sm:p-3 rounded-2xl border-2 border-sky-300 flex flex-col justify-between overflow-hidden shadow-inner">
+                <div class="flex items-center justify-between mb-1">
+                    <h2 class="text-xs sm:text-sm font-bold text-sky-900 flex items-center gap-1">
+                        <span>⏳</span> Urutan Kronologi (1 - 10)
+                    </h2>
+                    <span class="text-[10px] text-sky-700 italic">1 = Awal, 10 = Akhir</span>
+                </div>
+
+                <div id="timeline-slots" class="grid grid-cols-1 gap-1.5 sm:gap-2 overflow-y-auto max-h-[calc(100%-1.75rem)] pr-1">
+                    <!-- Timeline target slots dynamically rendered here -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Control Bar -->
+        <footer class="relative z-10 flex items-center justify-between bg-white/80 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl shadow-md border border-amber-200">
+            <div class="text-[10px] sm:text-xs text-slate-600 font-semibold flex items-center space-x-1">
+                <span>💡</span>
+                <span id="instruction-text">Lengkapi semua 10 peristiwa kehidupan Yusuf lalu klik "Cek Hasil"!</span>
+            </div>
+
+            <button onclick="checkResults()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl shadow-lg border-b-4 border-emerald-700 transition flex items-center space-x-1.5">
+                <span>⭐</span>
+                <span>Cek Hasil</span>
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- MODAL 1: Player Name Input (Initial & Change Player) -->
+    <div id="player-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-amber-400 p-5 sm:p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+            <div class="text-4xl sm:text-5xl">👑</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-amber-900">Selamat Datang di Gim Kisah Yusuf!</h2>
+            <p class="text-xs sm:text-sm text-slate-600">
+                Pendidikan Agama Katolik dan Budi Pekerti Kelas 3 Fase B
+            </p>
+            <div class="text-left space-y-1">
+                <label class="text-xs font-bold text-slate-700 ml-1">Masukkan Nama Murid:</label>
+                <input type="text" id="input-player-name" placeholder="Contoh: Maria / Yohanes" class="w-full px-4 py-2.5 rounded-xl border-2 border-amber-300 focus:border-amber-500 focus:outline-none text-sm font-semibold">
+            </div>
+            <button onclick="savePlayerName()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl border-b-4 border-amber-700 text-sm sm:text-base shadow-lg transition active:scale-95">
+                Mulai Petualangan 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Learning Objectives (Tujuan Pembelajaran) -->
+    <div id="objectives-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl border-4 border-sky-400 p-5 sm:p-6 max-w-lg w-full shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b pb-2">
+                <h2 class="text-lg sm:text-xl font-bold text-sky-900 flex items-center gap-2">
+                    <span>🎯</span> Tujuan Pembelajaran
+                </h2>
+                <button onclick="closeObjectivesModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✖</button>
+            </div>
+            <div class="bg-sky-50 p-3 sm:p-4 rounded-2xl border border-sky-200 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+                <p class="font-bold text-sky-900">Mata Pelajaran: Pendidikan Agama Katolik dan Budi Pekerti Kelas 3 Fase B</p>
+                <p>
+                    "Melalui berbagai metode pembelajaran, murid mampu mengenal Allah yang menyelamatkan manusia sebagaimana tercermin pada <strong>Kisah Yusuf</strong> yang mengalami berbagai penderitaan hingga menjadi penguasa di Mesir; dan berusaha <strong>meneladan Yusuf untuk meraih prestasi dengan kerja keras dan tabah</strong> dalam menghadapi berbagai rintangan dengan senantiasa <strong>mengandalkan pertolongan Tuhan</strong>."
+                </p>
+            </div>
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-900">
+                <strong>Nilai Karakter Inti:</strong> Ketabahan, Kerja Keras, Mengampuni, Setia Berdoa, Mengandalkan Tuhan dalam Segala Situasi.
+            </div>
+            <button onclick="closeObjectivesModal()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 rounded-xl border-b-4 border-sky-700 text-xs sm:text-sm">
+                Saya Mengerti & Siap Belajar! 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Result & Reflection (Nilai & Refleksi Detail) -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="bg-white rounded-3xl border-4 border-amber-400 p-4 sm:p-6 max-w-xl w-full shadow-2xl space-y-3 sm:space-y-4 max-h-[92vh] overflow-y-auto">
+            
+            <!-- Result Header -->
+            <div class="text-center space-y-1">
+                <div id="result-stars" class="text-3xl sm:text-4xl">⭐⭐⭐</div>
+                <h2 id="result-title" class="text-xl sm:text-2xl font-bold text-amber-900">Hasil Evaluasi</h2>
+                <p class="text-xs text-slate-600">Pemain: <span id="result-player-name" class="font-bold text-sky-700"></span></p>
+            </div>
+
+            <!-- Score Display Box (Min 65, Max 100) -->
+            <div class="bg-amber-100 border-2 border-amber-300 rounded-2xl p-3 text-center">
+                <span class="text-xs text-amber-800 font-semibold block">NILAI AKHIR KAMU:</span>
+                <span id="result-score" class="text-4xl sm:text-5xl font-extrabold text-amber-600">100</span>
+                <span class="text-xs text-slate-500 block mt-0.5" id="result-accuracy-text">10 dari 10 urutan tepat!</span>
+            </div>
+
+            <!-- Pedagogical Reflection & Narrative Feedback -->
+            <div class="bg-slate-50 p-3 sm:p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm space-y-2 text-slate-700">
+                <h3 class="font-bold text-slate-900 border-b pb-1 flex items-center gap-1">
+                    <span>📖</span> Refleksi & Pemahaman Kisah Yusuf:
+                </h3>
+                <div id="reflection-content" class="space-y-1.5 text-xs leading-relaxed">
+                    <!-- Dynamic reflection text inserted here -->
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="closeResultModal(); resetGame();" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 sm:py-2.5 rounded-xl border-b-4 border-amber-700 text-xs sm:text-sm flex items-center justify-center gap-1">
+                    <span>🔄</span> Ulangi Gim
+                </button>
+                <button onclick="changePlayer()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-2.5 rounded-xl border-b-4 border-purple-800 text-xs sm:text-sm flex items-center justify-center gap-1">
+                    <span>👤</span> Ganti Pemain
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===================================================================
+           1. WEB AUDIO API SYNTHESIZER SOUND ENGINE (No External Files)
+           =================================================================== */
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'select') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'place') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now); // A4
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'reset') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'error') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(180, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'win') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.type = 'sine';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        noteGain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.2);
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        noteOsc.start(now + idx * 0.1);
+                        noteOsc.stop(now + idx * 0.1 + 0.2);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        /* ===================================================================
+           2. GAME DATA (10 Sequential Chronological Events of Joseph's Life)
+           =================================================================== */
+        const storyEventsData = [
+            {
+                id: 1,
+                correctOrder: 1,
+                title: "Jubah Indah & Mimpi Yusuf",
+                desc: "Yusuf dikasihi ayahnya (Yakub) dan diberi jubah indah. Ia bermimpi 11 bintang, matahari, dan bulan membungkuk padanya.",
+                icon: "🧥",
+                location: "Kanaan",
+                details: "Awal Mula: Yusuf diberi jubah bertabur warna indah oleh ayahnya."
+            },
+            {
+                id: 2,
+                correctOrder: 2,
+                title: "Saudara-saudara Iri Hati",
+                desc: "Melihat Yusuf lebih disayangi dan mendengar cerita mimpi-mimpinya, kakak-kakaknya menjadi sangat iri dan cemburu.",
+                icon: "😠",
+                location: "Kanaan",
+                details: "Perasaan Tokoh: Kakak-kakak Yusuf iri hati, tetapi Yusuf tetap polos dan sabar."
+            },
+            {
+                id: 3,
+                correctOrder: 3,
+                title: "Dibuang ke Sumur Dothan",
+                desc: "Saat mendatangi kakak-kakaknya di padang rumput, Yusuf ditangkap lalu dimasukkan ke dalam sumur kering yang dalam.",
+                icon: "🕳️",
+                location: "Sumur Dothan",
+                details: "Penderitaan Yusuf: Yusuf dibuang secara tidak adil."
+            },
+            {
+                id: 4,
+                correctOrder: 4,
+                title: "Dijual ke Pedagang Mesir",
+                desc: "Kakak-kakaknya mengeluarkan Yusuf dari sumur lalu menjualnya seharga 20 perak kepada pedagang yang menuju Mesir.",
+                icon: "🪙",
+                location: "Dothan - Mesir",
+                details: "Awal perjalanan jauh ke tanah Mesir sebagai hamba."
+            },
+            {
+                id: 5,
+                correctOrder: 5,
+                title: "Setia Bekerja di Rumah Potifar",
+                desc: "Di Mesir, Yusuf bekerja jujur dan rajin di rumah Potifar (perwira Firaun). Tuhan memberkati semua pekerjaan Yusuf.",
+                icon: "🏛️",
+                location: "Rumah Potifar",
+                details: "Karakter: Jujur, rajin, dan senantiasa diandalkan."
+            },
+            {
+                id: 6,
+                correctOrder: 6,
+                title: "Difitnah & Masuk Penjara",
+                desc: "Yusuf menolak berbuat jahat, namun ia difitnah oleh istri Potifar hingga dimasukkan ke dalam penjara Mesir.",
+                icon: "⛓️",
+                location: "Penjara Mesir",
+                details: "Ketabahan: Yusuf tetap percaya pada Tuhan meskipun difitnah."
+            },
+            {
+                id: 7,
+                correctOrder: 7,
+                title: "Mengartikan Mimpi di Penjara",
+                desc: "Dengan pertolongan dan hikmat Allah, Yusuf berhasil mengartikan mimpi juru minuman dan juru roti Firaun secara tepat.",
+                icon: "🍷",
+                location: "Penjara Mesir",
+                details: "Keajaiban Ilahi: Allah memberikan karunia hikmat mengartikan mimpi."
+            },
+            {
+                id: 8,
+                correctOrder: 8,
+                title: "Mengartikan Mimpi Firaun",
+                desc: "Firaun bermimpi 7 lembu kurus memakan 7 lembu gemuk. Yusuf menjelaskan akan ada 7 tahun kelimpahan & 7 tahun kelaparan.",
+                icon: "🌾",
+                location: "Istana Firaun",
+                details: "Kebijaksanaan: Firaun kagum akan Roh Allah di dalam diri Yusuf."
+            },
+            {
+                id: 9,
+                correctOrder: 9,
+                title: "Menjadi Penguasa Mesir",
+                desc: "Firaun mengangkat Yusuf menjadi penguasa Mesir untuk mengelola lumbung gandum dan bersiap menghadapi musim kelaparan.",
+                icon: "👑",
+                location: "Seluruh Mesir",
+                details: "Prestasi: Hasil ketabahan, kerja keras, dan penyertaan Tuhan."
+            },
+            {
+                id: 10,
+                correctOrder: 10,
+                title: "Mengampuni & Menyelamatkan",
+                desc: "Yusuf menyambut saudara-saudaranya yang mencari makan, memaafkan mereka, dan menyelamatkan seluruh keluarganya.",
+                icon: "❤️",
+                location: "Istana Mesir",
+                details: "Puncak Kisah: Allah mereka-rekakan penderitaan menjadi kebaikan besar."
+            }
+        ];
+
+        /* ===================================================================
+           3. GAME STATE MANAGEMENT
+           =================================================================== */
+        let playerName = "Murid Kelas 3";
+        let availableCards = []; // Unplaced cards pool
+        let userSlots = Array(10).fill(null); // 10 Timeline target slots
+        let selectedPoolCardId = null; // Track selected card for tap-and-place
+
+        /* Initialization on Page Load */
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('player-modal').classList.remove('hidden');
+        });
+
+        function savePlayerName() {
+            playSound('select');
+            const inputName = document.getElementById('input-player-name').value.trim();
+            if (inputName !== "") {
+                playerName = inputName;
+            }
+            document.getElementById('display-player-name').innerText = playerName;
+            document.getElementById('player-modal').classList.add('hidden');
+            resetGame();
+        }
+
+        function changePlayer() {
+            playSound('select');
+            document.getElementById('result-modal').classList.add('hidden');
+            document.getElementById('player-modal').classList.remove('hidden');
+        }
+
+        /* Shuffle Array Function */
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArray = [...array];
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]];
+            }
+            return newArray;
+        }
+
+        /* Reset & Initialize Game Board */
+        function resetGame() {
+            playSound('reset');
+            selectedPoolCardId = null;
+            userSlots = Array(10).fill(null);
+            availableCards = shuffle(storyEventsData);
+            renderBoard();
+            updateInstruction("Pilih/Sentuh peristiwa di sebelah kiri, lalu klik nomor urutan (1-10) di sebelah kanan.");
+        }
+
+        /* ===================================================================
+           4. BOARD RENDERING LOGIC & CARD INTERACTION HANDLERS
+           =================================================================== */
+        function renderBoard() {
+            const poolContainer = document.getElementById('cards-pool');
+            const slotsContainer = document.getElementById('timeline-slots');
+
+            poolContainer.innerHTML = '';
+            slotsContainer.innerHTML = '';
+
+            /* A. Render Available Unassigned Cards Pool */
+            if (availableCards.length === 0) {
+                poolContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center p-4 border-2 border-dashed border-amber-300 rounded-xl text-center text-amber-800">
+                        <span class="text-2xl mb-1">✨</span>
+                        <p class="text-xs font-bold">Semua 10 peristiwa sudah dipindahkan!</p>
+                        <p class="text-[10px] opacity-80">Klik "Cek Hasil" di bawah untuk melihat nilaimu.</p>
+                    </div>
+                `;
+            } else {
+                availableCards.forEach(card => {
+                    const isSelected = (selectedPoolCardId === card.id);
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `card-item bg-white p-2 sm:p-2.5 rounded-xl border-2 ${isSelected ? 'border-amber-500 ring-2 ring-amber-400 bg-amber-50' : 'border-amber-200'} shadow-sm cursor-pointer flex items-start space-x-2 active:scale-95 transition`;
+                    
+                    cardEl.onclick = () => selectPoolCard(card.id);
+
+                    cardEl.innerHTML = `
+                        <div class="text-xl sm:text-2xl bg-amber-100 p-1.5 rounded-lg shrink-0">${card.icon}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-bold text-amber-950 truncate">${card.title}</h3>
+                                <span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold shrink-0">${card.location}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-600 line-clamp-2 mt-0.5 leading-tight">${card.desc}</p>
+                        </div>
+                    `;
+                    poolContainer.appendChild(cardEl);
+                });
+            }
+
+            /* B. Render 10 Timeline Target Slots */
+            for (let i = 0; i < 10; i++) {
+                const assignedCard = userSlots[i];
+                const slotEl = document.createElement('div');
+                
+                if (assignedCard) {
+                    slotEl.className = `card-item bg-white p-1.5 sm:p-2 rounded-xl border-2 border-sky-400 shadow-sm flex items-center justify-between space-x-2`;
+                    slotEl.innerHTML = `
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-sky-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow">
+                                ${i + 1}
+                            </span>
+                            <span class="text-base sm:text-xl shrink-0">${assignedCard.icon}</span>
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-bold text-slate-800 truncate">${assignedCard.title}</h4>
+                                <p class="text-[9px] text-slate-500 truncate">${assignedCard.location}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeSlotCard(${i})" class="bg-rose-100 hover:bg-rose-200 text-rose-600 text-xs p-1 rounded-lg font-bold shrink-0 transition" title="Batalkan/Kembalikan">
+                            ✖
+                        </button>
+                    `;
+                } else {
+                    const isTargetable = (selectedPoolCardId !== null);
+                    slotEl.className = `p-2 rounded-xl border-2 border-dashed ${isTargetable ? 'border-sky-400 bg-sky-100/60 animate-pulse cursor-pointer' : 'border-sky-200 bg-sky-50/50'} flex items-center space-x-2 transition`;
+                    slotEl.onclick = () => {
+                        if (selectedPoolCardId !== null) {
+                            assignSelectedCardToSlot(i);
+                        } else {
+                            playSound('error');
+                            updateInstruction("Pilih peristiwa di kolom sebelah kiri terlebih dahulu!");
+                        }
+                    };
+                    slotEl.innerHTML = `
+                        <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-sky-200 text-sky-800 font-bold text-xs flex items-center justify-center shrink-0">
+                            ${i + 1}
+                        </span>
+                        <span class="text-xs text-sky-700 italic font-medium">
+                            ${isTargetable ? '👉 Klik di sini untuk posisi urutan ke-' + (i + 1) : 'Posisi Urutan ke-' + (i + 1)}
+                        </span>
+                    `;
+                }
+
+                slotsContainer.appendChild(slotEl);
+            }
+        }
+
+        function selectPoolCard(cardId) {
+            playSound('select');
+            if (selectedPoolCardId === cardId) {
+                selectedPoolCardId = null;
+                updateInstruction("Pilihan dibatalkan. Pilih/sentuh peristiwa di sebelah kiri.");
+            } else {
+                selectedPoolCardId = cardId;
+                const card = storyEventsData.find(c => c.id === cardId);
+                updateInstruction(`Peristiwa "${card ? card.title : ''}" dipilih. Sekarang klik salah satu kolom urutan (1-10) di kanan.`);
+            }
+            renderBoard();
+        }
+
+        function assignSelectedCardToSlot(slotIndex) {
+            if (selectedPoolCardId === null) return;
+            playSound('place');
+
+            const cardToAssign = storyEventsData.find(c => c.id === selectedPoolCardId);
+            if (!cardToAssign) return;
+
+            availableCards = availableCards.filter(c => c.id !== selectedPoolCardId);
+
+            if (userSlots[slotIndex]) {
+                availableCards.push(userSlots[slotIndex]);
+            }
+
+            userSlots[slotIndex] = cardToAssign;
+            selectedPoolCardId = null;
+
+            renderBoard();
+            updateInstruction(`Peristiwa diletakkan di urutan ke-${slotIndex + 1}. Silakan lanjutkan mengurutkan.`);
+        }
+
+        function removeSlotCard(slotIndex) {
+            playSound('reset');
+            const removedCard = userSlots[slotIndex];
+            if (removedCard) {
+                userSlots[slotIndex] = null;
+                availableCards.push(removedCard);
+                renderBoard();
+                updateInstruction(`Peristiwa dikembalikan ke daftar kiri.`);
+            }
+        }
+
+        function updateInstruction(text) {
+            const el = document.getElementById('instruction-text');
+            if (el) el.innerText = text;
+        }
+
+        function openLearningObjectivesModal() {
+            playSound('select');
+            document.getElementById('objectives-modal').classList.remove('hidden');
+        }
+
+        function closeObjectivesModal() {
+            playSound('select');
+            document.getElementById('objectives-modal').classList.add('hidden');
+        }
+
+        function closeResultModal() {
+            playSound('select');
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        /* ===================================================================
+           5. EVALUATION, SCORING (Min 65, Max 100) & REFLECTION MODAL LOGIC
+           =================================================================== */
+        function checkResults() {
+            const filledCount = userSlots.filter(s => s !== null).length;
+            if (filledCount < 10) {
+                playSound('error');
+                updateInstruction(`Kamu baru mengisi ${filledCount} dari 10 peristiwa! Lengkapi semua urutan terlebih dahulu.`);
+                return;
+            }
+
+            let correctCount = 0;
+            userSlots.forEach((slotCard, index) => {
+                if (slotCard && slotCard.correctOrder === (index + 1)) {
+                    correctCount++;
+                }
+            });
+
+            // Minimum score = 65, Maximum score = 100
+            const score = Math.round(65 + (correctCount / 10) * 35);
+
+            if (score === 100) {
+                playSound('win');
+            } else {
+                playSound('select');
+            }
+
+            showResultModal(score, correctCount);
+        }
+
+        function showResultModal(score, correctCount) {
+            document.getElementById('result-player-name').innerText = playerName;
+            document.getElementById('result-score').innerText = score;
+            document.getElementById('result-accuracy-text').innerText = `${correctCount} dari 10 urutan tepat!`;
+
+            const starsEl = document.getElementById('result-stars');
+            const titleEl = document.getElementById('result-title');
+
+            if (score === 100) {
+                starsEl.innerText = "⭐⭐⭐";
+                titleEl.innerText = "Sempurna! Nilai 100!";
+                titleEl.className = "text-xl sm:text-2xl font-bold text-emerald-600";
+            } else if (score >= 80) {
+                starsEl.innerText = "⭐⭐☆";
+                titleEl.innerText = "Luar Biasa!";
+                titleEl.className = "text-xl sm:text-2xl font-bold text-amber-600";
+            } else {
+                starsEl.innerText = "⭐☆☆";
+                titleEl.innerText = "Tetap Semangat Belajar!";
+                titleEl.className = "text-xl sm:text-2xl font-bold text-purple-600";
+            }
+
+            const reflectionEl = document.getElementById('reflection-content');
+            let reflectionHTML = "";
+
+            if (score === 100) {
+                reflectionHTML = `
+                    <p class="text-emerald-800 font-bold">🎉 Selamat ${playerName}! Kamu berhasil mengurutkan seluruh 10 peristiwa Kisah Yusuf dengan tepat sempurna!</p>
+                    <ul class="list-disc pl-4 space-y-1 mt-1 text-slate-700">
+                        <li><strong>Rangkaian Lengkap:</strong> Dari jubah indah di Kanaan, sumur Dothan, dijual ke Mesir, rumah Potifar, penjara, mengartikan mimpi Firaun, menjadi penguasa Mesir, hingga mengampuni saudara-saudaranya.</li>
+                        <li><strong>Keajaiban Ilahi:</strong> Allah tidak pernah meninggalkan Yusuf. Segala penderitaannya diubah Tuhan menjadi jalan keselamatan bagi banyak orang.</li>
+                        <li><strong>Teladan Hidup:</strong> Kamu telah meneladan sifat Yusuf yang <em>rajin, jujur, tabah, suka mengampuni, dan senantiasa mengandalkan Tuhan</em>.</li>
+                    </ul>
+                `;
+            } else {
+                reflectionHTML = `
+                    <p class="text-amber-800 font-bold">Bagus sekali ${playerName}! Kamu mendapatkan nilai ${score} (${correctCount} dari 10 tepat).</p>
+                    <p class="mt-1">Mari ingat kembali kronologi ringkas 10 langkah hidup Yusuf:</p>
+                    <ol class="list-decimal pl-4 space-y-1 mt-1 text-slate-700">
+                        <li>Jubah indah & mimpi -> 2. Kakak iri hati -> 3. Sumur Dothan -> 4. Dijual ke Mesir -> 5. Rumah Potifar.</li>
+                        <li>Difitnah & dipenjara -> 7. Arti mimpi pegawai -> 8. Arti mimpi Firaun -> 9. Jadi penguasa Mesir -> 10. Mengampuni keluarga.</li>
+                    </ol>
+                    <p class="mt-2 text-slate-600 italic">Klik "Ulangi Gim" untuk mencoba lagi dan raih nilai 100!</p>
+                `;
+            }
+
+            reflectionEl.innerHTML = reflectionHTML;
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
